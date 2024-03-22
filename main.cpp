@@ -1,34 +1,86 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <iostream>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <cstring>
+#include "TCPController.h"
+#include "Parser.h"
 
-
-int main()
+int main(int argc, char *argv[])
 {
-   int sock = 0, valread;
-   struct sockaddr_in serv_addr;
-   char buffer[1024] = {0};
-   if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-       printf("\n Socket creation error \n");
-       return -1;
-   }
-   serv_addr.sin_family = AF_INET;
-   serv_addr.sin_port = htons(8080);
-   // Convert IPv4 and IPv6 addresses from text to binary form
-   if(inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr)<=0) {
-       printf("\nInvalid address/ Address not supported \n");
-       return -1;
-   }
-   if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
-       printf("\nConnection Failed \n");
-       return -1;
-   }
-   send(sock, "Hello from client\n", strlen("Hello from client\n"), 0);
-   printf("Hello message sent\n");
-   //valread = fread(sock, buffer, 1024);
-   //printf("%s\n",buffer );
-   return 0;
+    // --ARGUMENT PARSING--
+    // //set default arguments
+    // struct ParsedArgs args;
+    // int c;
+    // args.port = 4567;
+    // args.timeout = 250;
+    // args.transmissions = 3;
+
+    // //get args
+    // while ((c = getopt(argc, argv, "t:s:p:d:r:h")) != -1)
+    // {
+    //     switch(c)
+    //     {
+    //     case 't':
+    //         if(strcmp(optarg, "tcp") == 0)
+    //         {
+    //             args.protocol = TCP;
+    //         }
+    //         else if(strcmp(optarg, "udp") == 0)
+    //         {
+    //             args.protocol = UDP;
+    //         }
+    //         else
+    //         {
+    //             std::cerr << "Invalid protocol specified.\n";
+    //             exit(1);
+    //         }
+    //         break;
+    //     case 's':
+    //         args.ip = optarg;
+    //         break;
+    //     case 'p':
+    //         args.port = std::stoi(optarg); // TODO: stoi errory
+    //         break;
+    //     case 'd':
+    //         args.timeout = std::stoi(optarg);
+    //         break;
+    //     case 'r':
+    //         args.transmissions = std::stoi(optarg);
+    //         break;
+    //     case '?':
+    //     default:
+    //         //TODO: dopíš help
+    //         std::cout << "this is help\n";
+    //         exit(1);
+    //     }
+    // }
+
+    // //check for mandatory arguments
+    // int check = 0;
+    // for(int i = 0; i < argc; i++)
+    // {
+    //     if((strcmp(argv[i], "-t") == 0) || (strcmp(argv[i], "-s") == 0))check++;
+    // }
+    // if(check != 2)
+    // {
+    //     std::cerr << "You need specify -t and -s arguments.\n";
+    //     exit(1);
+    // }
+
+    // std::cout << "ip: \t\t" << args.ip << "\n";
+    // std::cout << "port: \t\t" << args.port << "\n";
+    // std::cout << "protocol: \t\t" << args.protocol << "\n";
+    // std::cout << "timeout: \t\t" << args.timeout << "\n";
+    // std::cout << "transmision: \t\t" << args.transmissions << "\n";
+
+
+
+    //resolve ip from domain
+    
+
+    //TCP connection
+
+    //147.229.8.244 -- anton5.fit.vutbr.cz
+    TCPController controller = TCPController("127.0.0.1", 4567);
+    controller.chat();
+    
+    return 0;
 }
