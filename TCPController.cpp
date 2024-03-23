@@ -240,7 +240,7 @@ void TCPController::receiver()
                         SenderInput newInput;
                         newInput.is_packet = true;
                         newInput.packet = new TCPPacketBye();
-                        this->commands.push()
+                        this->commands.push(newInput);
                     }
                     else
                     {
@@ -267,7 +267,7 @@ void TCPController::receiver()
                         SenderInput newInput;
                         newInput.is_packet = true;
                         newInput.packet = new TCPPacketBye();
-                        this->commands.push()
+                        this->commands.push(newInput);
                     }
                     else if(packet->getType() == BYE)
                     {
@@ -278,7 +278,7 @@ void TCPController::receiver()
                         SenderInput newInput;
                         newInput.is_packet = true;
                         newInput.packet = new TCPPacketBye();
-                        this->commands.push()
+                        this->commands.push(newInput);
                     }                 
                     break;
                 }                            
