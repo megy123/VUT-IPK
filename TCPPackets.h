@@ -2,7 +2,7 @@
 #define TCP_AUTH_PACKET
 
 #include <string>
-#include "Packet.h"
+#include "MyPacket.h"
 
 //ERR packet
 class TCPPacketErr : public Packet{

@@ -1,13 +1,5 @@
 #include "TCPPackets.h"
 
-// ERR	ERR FROM {DisplayName} IS {MessageContent}\r\n
-// REPLY	REPLY {"OK"|"NOK"} IS {MessageContent}\r\n
-// AUTH	AUTH {Username} AS {DisplayName} USING {Secret}\r\n
-// JOIN	JOIN {ChannelID} AS {DisplayName}\r\n
-// MSG	MSG FROM {DisplayName} IS {MessageContent}\r\n
-// BYE	BYE\r\n
-// CONFIRM	Unused in TCP
-
 //ERR packet
 TCPPacketErr::TCPPacketErr(std::string displayName, std::string messageContent)
 {

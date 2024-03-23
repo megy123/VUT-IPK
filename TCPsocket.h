@@ -1,7 +1,7 @@
 #ifndef TCPSOC
 #define TCPSOC
 
-#include "Packet.h"
+#include "MyPacket.h"
 
 class TCPSocket{
 private:

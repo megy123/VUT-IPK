@@ -2,6 +2,15 @@
 #include <stdlib.h>
 #include "TCPController.h"
 #include "Parser.h"
+#include <signal.h>
+
+TCPController* controller;
+
+void handle(int i)
+{
+    controller->int_handler();
+    exit(i);
+}
 
 int main(int argc, char *argv[])
 {
@@ -79,8 +88,21 @@ int main(int argc, char *argv[])
     //TCP connection
 
     //147.229.8.244 -- anton5.fit.vutbr.cz
-    TCPController controller = TCPController("127.0.0.1", 4567);
-    controller.chat();
+    controller = new TCPController("127.0.0.1", 4567);
     
+    struct sigaction sigIntHandler;
+
+    sigIntHandler.sa_handler = handle;
+    sigemptyset(&sigIntHandler.sa_mask);
+    sigIntHandler.sa_flags = 0;
+
+    sigaction(SIGINT, &sigIntHandler, NULL);
+
+    
+    controller->chat();
+    
+
+
     return 0;
 }
+

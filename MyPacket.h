@@ -21,6 +21,5 @@ public:
     virtual std::string getData(){ return ""; };
 };
 
-Packet* getPacket(std::string data);
 
 #endif

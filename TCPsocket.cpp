@@ -5,7 +5,7 @@
 #include <arpa/inet.h>
 #include <cstring>
 #include <unistd.h>
-#include "Packet.h"
+#include "MyPacket.h"
 #include "TCPPackets.h"
 
 TCPSocket::TCPSocket(){}
@@ -43,8 +43,23 @@ void TCPSocket::sendPacket(Packet *packet)
     std::string data;
     switch (packet->getType())
     {
+    case ERR:
+        data = dynamic_cast<TCPPacketErr *>(packet)->getData();
+        break;
+    case REPLY:
+        data = dynamic_cast<TCPPacketReply *>(packet)->getData();
+        break;
     case AUTH:
         data = dynamic_cast<TCPPacketAuth *>(packet)->getData();
+        break;
+    case JOIN:
+        data = dynamic_cast<TCPPacketJoin *>(packet)->getData();
+        break;
+    case MSG:
+        data = dynamic_cast<TCPPacketMsg *>(packet)->getData();
+        break;
+    case BYE:
+        data = dynamic_cast<TCPPacketBye *>(packet)->getData();
         break;
     default:
         std::cerr << "Invalid packet!\n";
@@ -54,7 +69,7 @@ void TCPSocket::sendPacket(Packet *packet)
 
     //send data
     send(this->soc, data.c_str(), strlen(data.c_str()), 0);
-    printf("--message sent\n");
+    //printf("--message sent\n");
 
 
 }
@@ -64,7 +79,7 @@ std::string TCPSocket::receiveData()
     //receive data
     char buffer[1024] = {0};
     read(this->soc, buffer, 1024);
-    printf("--message received\n");
+    //printf("--message received\n");
     //std::cout << buffer;
 
     return buffer;

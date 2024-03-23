@@ -28,38 +28,43 @@ void getCommand(std::queue<struct SenderInput> *output, std::string commStr)
     }
 
     SenderInput out;
-    out.command = command;
     out.is_packet = false;
-    output->push(out);
+    
 
     //TODO: kontrola spravnosti parametrov
     //check commands
-    //output->clear();
-    // if(command[0] == COMAUTH)
-    // {
-    //     output->push_back(COMAUTH);
-    //     output->push_back(command[1]);//username
-    //     output->push_back(command[2]);//secret
-    //     output->push_back(command[3]);//displayName
-    // }
-    // else if(command[0] == COMJOIN)
-    // {
-    //     output->push_back(COMJOIN);
-    //     output->push_back(command[1]);//chanelID
-    // }
-    // else if(command[0] == COMRENAME)
-    // {
-    //     output->push_back(COMRENAME);
-    //     output->push_back(command[1]);//displayName
-    // }
-    // else if(command[0] == COMHELP)
-    // {
-    //     output->push_back(COMHELP);
-    // }
-    // else
-    // {
-    //     output->push_back(command[0]);//message
-    // }
+    if(command[0] == COMAUTH)
+    {
+        // output->push_back(COMAUTH);
+        // output->push_back(command[1]);//username
+        // output->push_back(command[2]);//secret
+        // output->push_back(command[3]);//displayName
+        out.command = command;
+    }
+    else if(command[0] == COMJOIN)
+    {
+        // output->push_back(COMJOIN);
+        // output->push_back(command[1]);//chanelID
+        out.command = command;
+    }
+    else if(command[0] == COMRENAME)
+    {
+        // output->push_back(COMRENAME);
+        // output->push_back(command[1]);//displayName
+        out.command = command;
+    }
+    else if(command[0] == COMHELP)
+    {
+        // output->push_back(COMHELP);
+        out.command = command;
+    }
+    else
+    {
+        std::vector<std::string> mess = {commStr};
+        out.command = mess;
+    }
+
+    output->push(out);
 
 }
 
@@ -76,6 +81,7 @@ Packet* resolvePacket(std::string receivedMsg)
         packetData.push_back(receivedMsg.substr(start, end - start));
     }
 
+    
     if(packetData[0] == "REPLY")
     {
         if(packetData[1] == "OK")
@@ -91,8 +97,13 @@ Packet* resolvePacket(std::string receivedMsg)
     {
         return new TCPPacketErr(packetData[2], getDataToEnd(packetData, 4));
     }
-    else
+    else if(packetData[0] == "MSG")
     {
-        return nullptr;
+        return new TCPPacketMsg(packetData[2], getDataToEnd(packetData, 4));
     }
+    else if(packetData[0] == "BYE")
+    {
+        return new TCPPacketBye();
+    }
+    return nullptr;
 }

@@ -52,6 +52,7 @@ std::string TCPController::getPacketMessage(Packet* packet)
             break;
         }
     }
+    return "";
 }
 
 void TCPController::sender()
@@ -83,6 +84,7 @@ void TCPController::sender()
                     {
                         if(command.command[0] == COMAUTH)
                         {
+                            this->displayName = command.command[2];
                             TCPPacketAuth *packet = new TCPPacketAuth(command.command[1], command.command[2], command.command[3]);
                             this->socket.sendPacket(packet);
                             state = STATE_AUTH;
@@ -121,6 +123,7 @@ void TCPController::sender()
                     {
                         if(command.command[0] == COMAUTH)
                         {
+                            this->displayName = command.command[2];
                             TCPPacketAuth *packet = new TCPPacketAuth(command.command[1], command.command[2], command.command[3]);
                             this->socket.sendPacket(packet);
                             state = STATE_AUTH;
@@ -173,12 +176,12 @@ void TCPController::sender()
                         }
                         else if(command.command[0] == COMJOIN)
                         {
-                            TCPPacketJoin *packet = new TCPPacketJoin(command.command[1], command.command[2]);
+                            TCPPacketJoin *packet = new TCPPacketJoin(command.command[1], this->displayName);
                             this->socket.sendPacket(packet);
                         }
                         else if(command.command[0] == COMRENAME)
                         {
-                            //TODO: nwm to to ma byt
+                            this->displayName = command.command[1];
                         }
                         else if(command.command[0] == COMHELP)
                         {
@@ -186,7 +189,9 @@ void TCPController::sender()
                         }
                         else
                         {
-                            std::cerr << "ERR: Invalid command\"\n";
+                            //message
+                            TCPPacketMsg *packet = new TCPPacketMsg(this->displayName, command.command[0]);
+                            this->socket.sendPacket(packet);
                         }
                     }                
                     break;
@@ -224,7 +229,7 @@ void TCPController::receiver()
                 case STATE_AUTH:
                 {
                     std::string data = this->socket.receiveData();
-                    Packet* packet = getPacket(data);
+                    Packet* packet = resolvePacket(data);
 
                     if(packet->getType() == REPLY)
                     {
@@ -251,7 +256,7 @@ void TCPController::receiver()
                 case STATE_OPEN:
                 {
                     std::string data = this->socket.receiveData();
-                    Packet* packet = getPacket(data);
+                    Packet* packet = resolvePacket(data);
 
                     if(packet->getType() == MSG)
                     {
@@ -324,11 +329,11 @@ void TCPController::reader()
 
 void TCPController::chat()
 {
-    //std::thread rec_thread(&TCPController::receiver, this);
+    std::thread rec_thread(&TCPController::receiver, this);
     std::thread send_thread(&TCPController::sender, this);
     std::thread read_thread(&TCPController::reader, this);
 
-    //rec_thread.join();
+    rec_thread.join();
     send_thread.join();
     read_thread.join();
     
@@ -338,6 +343,13 @@ void TCPController::chat()
     std::cout << "chat\n";
 }
 
+void TCPController::int_handler()
+{
+    TCPPacketBye *packet = new TCPPacketBye();
+    this->socket.sendPacket(packet);
+}
+
 // /auth xsajko01 otravnyPomaranc 9c7150a2-15b7-4dbc-8ee4-b14a25d93257
 // REPLY OK IS Auth success.
-// ERR FROM {DisplayName} IS {MessageContent}
+// MSG FROM server_user IS sa uvedooom!!!
+// ERR FROM server_user IS {MessageContent}

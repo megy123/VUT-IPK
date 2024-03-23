@@ -2,7 +2,7 @@
 #define TCPCON
 
 #include "TCPsocket.h"
-#include "Packet.h"
+#include "MyPacket.h"
 #include <atomic>
 #include <mutex>
 #include <queue>
@@ -26,6 +26,7 @@ private:
     TCPSocket socket;
     std::queue<struct SenderInput> commands;
     std::atomic<FSMStates> state;
+    std::string displayName;
     std::mutex command_data_mux;
     std::mutex receiver_mux;
 
@@ -38,6 +39,7 @@ public:
     void reader();
 
     void chat();
+    void int_handler();
 };
 
 #endif
