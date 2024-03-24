@@ -1,5 +1,5 @@
-#ifndef TCP_AUTH_PACKET
-#define TCP_AUTH_PACKET
+#ifndef TCP_PACKETS
+#define TCP_PACKETS
 
 #include <string>
 #include "MyPacket.h"

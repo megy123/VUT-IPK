@@ -337,10 +337,6 @@ void TCPController::chat()
     send_thread.join();
     read_thread.join();
     
-
-    //TCPPacketAuth *packet = new TCPPacketAuth("xsajko01", "otravnyPomaranc", "9c7150a2-15b7-4dbc-8ee4-b14a25d93257");
-    //this->socket.sendPacket(packet);
-    std::cout << "chat\n";
 }
 
 void TCPController::int_handler()
