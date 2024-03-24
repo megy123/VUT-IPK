@@ -3,7 +3,7 @@
 
 UDPController::UDPController(const char server_ip[], int port, int timeout, int retramsittions)
 {
-    this->socket = TCPSocket(server_ip, port);
+    this->socket = TCPSocket(server_ip, port, SOCK_DGRAM);
     this->state = STATE_START;
     this->timeout = timeout;
     this->retramsittions = retramsittions;

@@ -8,12 +8,13 @@
 #include <chrono>
 #include <thread>
 #include <utility>
+#include <sys/socket.h>
 
 
 
-TCPController::TCPController(const char server_ip[], int port)
+TCPController::TCPController(const char server_ip[], const char port[])
 {
-    this->socket = TCPSocket(server_ip, port);
+    this->socket = Socket(server_ip, port, SOCK_STREAM);
     this->state = STATE_START;
 }
 

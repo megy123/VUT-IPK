@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
     //TCP connection
 
     //147.229.8.244 -- anton5.fit.vutbr.cz
-    controller = new TCPController("127.0.0.1", 4567);
+    controller = new TCPController("127.0.0.1", "4567");
     
     struct sigaction sigIntHandler;
 

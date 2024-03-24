@@ -1,7 +1,7 @@
 #ifndef TCPCON
 #define TCPCON
 
-#include "TCPsocket.h"
+#include "socket.h"
 #include "MyPacket.h"
 #include <atomic>
 #include <mutex>
@@ -23,7 +23,7 @@ struct SenderInput{
 
 class TCPController {
 private:
-    TCPSocket socket;
+    Socket socket;
     std::queue<struct SenderInput> commands;
     std::atomic<FSMStates> state;
     std::string displayName;
@@ -33,7 +33,7 @@ private:
     std::string getPacketMessage(Packet* packet);
 public:
     
-    TCPController(const char server_ip[], int port);
+    TCPController(const char server_ip[], const char port[]);
     void sender();
     void receiver();
     void reader();

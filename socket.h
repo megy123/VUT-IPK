@@ -3,13 +3,13 @@
 
 #include "MyPacket.h"
 
-class TCPSocket{
+class Socket{
 private:
     int soc;
 
 public:
-    TCPSocket();
-    TCPSocket(const char server_ip[], int port);
+    Socket();
+    Socket(const char server_ip[], const char port[], int socktype);
 
     void sendPacket(Packet *packet);
     std::string receiveData();

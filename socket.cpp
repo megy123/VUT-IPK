@@ -1,4 +1,4 @@
-#include "TCPsocket.h"
+#include "socket.h"
 #include <iostream>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
@@ -7,37 +7,50 @@
 #include <unistd.h>
 #include "MyPacket.h"
 #include "TCPPackets.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <limits.h>
+#include <stdbool.h>
 
-TCPSocket::TCPSocket(){}
+Socket::Socket(){}
 
-TCPSocket::TCPSocket(const char server_ip[], int port){
+Socket::Socket(const char server_ip[], const char port[], int socktype){
+    //resolve addrinfo
+    struct addrinfo *server_info;
+    struct addrinfo hints;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_INET;       // IPv4
+    hints.ai_socktype = socktype;    // TCP/UDP
+    hints.ai_protocol = 0;           // Protocol
 
-    struct sockaddr_in serv_addr;
+    int status = getaddrinfo(server_ip, "4567", &hints, &server_info);
 
-    if ((this->soc = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+    if (status != 0 || server_info->ai_addr == NULL)
     {
-        std::cerr << "Error while creating socket!\n";
-        throw 1;
+        std::cerr << "Failed to resolve hostname.\n";
+        exit(1);
     }
-    
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(port);
 
-    // Convert IPv4 and IPv6 addresses from text to binary form
-    if(inet_pton(AF_INET, server_ip, &serv_addr.sin_addr)<=0)
+    //init socket
+    if((this->soc = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol)) < 0)
     {
-        std::cerr << "Invalid address!\n";
-        throw 1;
+        std::cerr << "Invalid socket.\n";
+        exit(1);
     }
 
-    if (connect(this->soc, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
+    //connect
+    if(connect(this->soc, server_info->ai_addr, server_info->ai_addrlen) < 0)
     {
-        std::cerr << "Failed to connect to server!\n";
-        throw 1;
+        std::cerr << "Failed to connect.\n";
+        exit(1);        
     }
 }
 
-void TCPSocket::sendPacket(Packet *packet)
+void Socket::sendPacket(Packet *packet)
 {
     //get data
     std::string data;
@@ -69,12 +82,9 @@ void TCPSocket::sendPacket(Packet *packet)
 
     //send data
     send(this->soc, data.c_str(), strlen(data.c_str()), 0);
-    //printf("--message sent\n");
-
-
 }
 
-std::string TCPSocket::receiveData()
+std::string Socket::receiveData()
 {
     //receive data
     char buffer[1024] = {0};
@@ -85,7 +95,7 @@ std::string TCPSocket::receiveData()
     return buffer;
 }
 
-bool TCPSocket::dataAvailable()
+bool Socket::dataAvailable()
 {
     int count;
     ioctl(this->soc, FIONREAD, &count);
