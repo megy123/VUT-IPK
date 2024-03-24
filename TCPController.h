@@ -25,12 +25,23 @@ class TCPController {
 private:
     Socket socket;
     std::queue<struct SenderInput> commands;
+    std::queue<PacketType> awaiting_packets;
     std::atomic<FSMStates> state;
+
     std::string displayName;
     std::mutex command_data_mux;
     std::mutex receiver_mux;
 
     std::string getPacketMessage(Packet* packet);
+    void read_from_stdin();
+    void read_from_socket();
+    void handle_command(SenderInput command);
+    void handle_packet(SenderInput command);
+
+    void start_events();
+    void auth_events();
+    void open_events();
+    void error_events();
 public:
     
     TCPController(const char server_ip[], const char port[]);
