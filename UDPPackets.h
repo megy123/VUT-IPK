@@ -18,6 +18,7 @@ public:
 
     std::string getData();
     std::string getMessage();
+    uint16_t getMessageId();
 };
 
 //REPLY packet
@@ -35,6 +36,7 @@ public:
     std::string getData();
     bool getValidity();
     std::string getMessage();
+    uint16_t getMessageId();
 };
 
 //AUTH packet
@@ -50,6 +52,7 @@ public:
     UDPPacketAuth(uint16_t messageId, std::string username, std::string displayName, std::string secret);
 
     std::string getData();
+    uint16_t getMessageId();
 };
 
 //JOIN packet
@@ -65,6 +68,7 @@ public:
     UDPPacketJoin(uint16_t messageId, std::string chanelID, std::string displayName);
 
     std::string getData();
+    uint16_t getMessageId();
 };
 
 //MESSAGE packet
@@ -80,7 +84,7 @@ public:
 
     std::string getData();
     std::string getMessage();
-    
+    uint16_t getMessageId();
 };
 
 //BYE packet
@@ -93,6 +97,7 @@ public:
 
     PacketType getType();
     std::string getData();
+    uint16_t getMessageId();
 };
 
 //CONFIRM packet
@@ -104,6 +109,7 @@ public:
 
     PacketType getType();
     std::string getData();
+    uint16_t getMessageId();
 };
 
 #endif

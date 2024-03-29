@@ -28,6 +28,11 @@ std::string UDPPacketErr::getMessage()
     return "ERR FROM " + this->displayName + ": " + this->messageContent + "\n";
 }
 
+uint16_t UDPPacketErr::getMessageId()
+{
+    return this->messageId;
+}
+
 //REPLY packet
 UDPPacketReply::UDPPacketReply(uint16_t messageId, bool is_ok, uint16_t refMessageId, std::string messageContent)
 {   
@@ -64,6 +69,11 @@ std::string UDPPacketReply::getMessage()
     return ok + this->messageContent + "\n";
 }
 
+uint16_t UDPPacketReply::getMessageId()
+{
+    return this->messageId;
+}
+
 //AUTH packet
 UDPPacketAuth::UDPPacketAuth(uint16_t messageId, std::string username, std::string displayName, std::string secret)
 {
@@ -94,6 +104,11 @@ std::string UDPPacketAuth::getData()
     return output;
 }
 
+uint16_t UDPPacketAuth::getMessageId()
+{
+    return this->messageId;
+}
+
 //JOIN packet
 UDPPacketJoin::UDPPacketJoin(uint16_t messageId, std::string chanelID, std::string displayName)
 {
@@ -116,6 +131,11 @@ std::string UDPPacketJoin::getData()
 
     //return data
     return output;
+}
+
+uint16_t UDPPacketJoin::getMessageId()
+{
+    return this->messageId;
 }
 
 //MSG packet
@@ -146,6 +166,11 @@ std::string UDPPacketMsg::getMessage()
     return this->displayName + ": " + this->messageContent + "\n";
 }
 
+uint16_t UDPPacketMsg::getMessageId()
+{
+    return this->messageId;
+}
+
 //BYE packet
 UDPPacketBye::UDPPacketBye(uint16_t messageId)
 {
@@ -162,6 +187,11 @@ std::string UDPPacketBye::getData()
     return output;
 }
 
+uint16_t UDPPacketBye::getMessageId()
+{
+    return this->messageId;
+}
+
 //CONFIRM packet
 UDPPacketConfirm::UDPPacketConfirm(uint16_t messageId)
 {
@@ -176,4 +206,9 @@ std::string UDPPacketConfirm::getData()
     std::string output = Packet::getUDPHeader(this->getType(), this->messageId);
     //return data
     return output;
+}
+
+uint16_t UDPPacketConfirm::getMessageId()
+{
+    return this->messageId;
 }

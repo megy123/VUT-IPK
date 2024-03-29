@@ -62,7 +62,7 @@ std::string TCPPacketReply::getMessage()
 }
 
 //AUTH packet
-TCPPacketAuth::TCPPacketAuth(std::string username, std::string displayName, std::string secret)
+TCPPacketAuth::TCPPacketAuth(std::string username, std::string secret, std::string displayName)
 {
     this->username = username;
     this->displayName = displayName;

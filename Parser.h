@@ -35,4 +35,6 @@ void getCommand(std::queue<struct SenderInput> *output, std::string commStr);
 
 Packet* resolvePacket(std::string receivedMsg);
 
+Packet* resolveUDPPacket(std::string receivedMsg);
+
 #endif

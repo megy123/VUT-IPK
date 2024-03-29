@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "TCPController.h"
+#include "UDPController.h"
 #include "Parser.h"
 #include <signal.h>
 
@@ -97,6 +98,7 @@ int main(int argc, char *argv[])
     sigIntHandler.sa_flags = 0;
 
     sigaction(SIGINT, &sigIntHandler, NULL);
+    sigaction(SIGQUIT, &sigIntHandler, NULL);
 
     
     controller->chat();

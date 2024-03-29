@@ -1,45 +1,41 @@
-#include "TCPController.h"
-#include <iostream>
-#include <string>
-#include <vector>
-#include "Parser.h"
-#include "TCPPackets.h"
-#include <sys/poll.h>
-#include <chrono>
-#include <thread>
-#include <utility>
+#include "UDPController.h"
+#include "UDPPackets.h"
 #include <sys/socket.h>
 
-TCPController::TCPController(const char server_ip[], const char port[])
+UDPController::UDPController(const char server_ip[],const char port[], int timeout, int retramsittions)
 {
-    this->socket = Socket(server_ip, port, SOCK_STREAM);
+    this->socket = Socket(server_ip, port, SOCK_DGRAM);
     this->state = STATE_START;
+    this->timeout = timeout;
+    this->retramsittions = retramsittions;
+    this->messageId = 0;
 }
 
-std::string TCPController::getPacketMessage(Packet* packet)
+
+std::string UDPController::getPacketMessage(Packet* packet)
 {
     switch(packet->getType())
     {
     case ERR:
         {
-            return dynamic_cast<TCPPacketErr*>(packet)->getMessage();
+            return dynamic_cast<UDPPacketErr*>(packet)->getMessage();
             break;
         }
     case REPLY:
         {
-            return dynamic_cast<TCPPacketReply*>(packet)->getMessage();
+            return dynamic_cast<UDPPacketReply*>(packet)->getMessage();
             break;
         }
     case MSG:
         {
-            return dynamic_cast<TCPPacketMsg*>(packet)->getMessage();
+            return dynamic_cast<UDPPacketMsg*>(packet)->getMessage();
             break;
         }
     }
     return "";
 }
 
-void TCPController::chat()
+void UDPController::chat()
 {
     while(this->state != STATE_END)
     {
@@ -48,7 +44,7 @@ void TCPController::chat()
             //get input
             if(this->awaiting_packets.empty())read_from_stdin();
             read_from_socket();
-
+            
             //fsm
             switch(this->state)
             {
@@ -83,7 +79,7 @@ void TCPController::chat()
 }
 
 //FSM states
-void TCPController::start_events()
+void UDPController::start_events()
 {
     if(this->awaiting_packets.empty())
     {
@@ -126,7 +122,7 @@ void TCPController::start_events()
     }
 }
 
-void TCPController::auth_events()
+void UDPController::auth_events()
 {
     if(!commands.empty())
     {
@@ -140,7 +136,7 @@ void TCPController::auth_events()
             //handle awaiting packets
             if(!awaiting_packets.empty())
             {
-                if(command.packet->getType() == this->awaiting_packets.front() || command.packet->getType() == ERR)
+                if(command.packet->getType() == this->awaiting_packets.front())
                 {
                     this->awaiting_packets.pop();                
                 }
@@ -155,7 +151,7 @@ void TCPController::auth_events()
             if(command.packet->getType() == REPLY)
             {
                 handle_packet(command);
-                if(dynamic_cast<TCPPacketReply*>(command.packet)->getValidity())
+                if(dynamic_cast<UDPPacketReply*>(command.packet)->getValidity())
                 {
                     this->state = STATE_OPEN;
                 }
@@ -163,7 +159,7 @@ void TCPController::auth_events()
             else if(command.packet->getType() == ERR)
             {
                 handle_packet(command);
-                TCPPacketBye* packet = new TCPPacketBye();
+                UDPPacketBye* packet = new UDPPacketBye(this->messageId++);
                 this->socket.sendPacket(packet);
                 this->state = STATE_END;
             }
@@ -194,7 +190,7 @@ void TCPController::auth_events()
     }
 }
 
-void TCPController::open_events()
+void UDPController::open_events()
 {
     if(!commands.empty())
     {
@@ -208,7 +204,7 @@ void TCPController::open_events()
             //handle awaiting packets
             if(!awaiting_packets.empty())
             {
-                if(command.packet->getType() == this->awaiting_packets.front() || command.packet->getType() == ERR)
+                if(command.packet->getType() == this->awaiting_packets.front())
                 {
                     this->awaiting_packets.pop();
                 }
@@ -265,36 +261,36 @@ void TCPController::open_events()
     }
 }
 
-void TCPController::error_events()
+void UDPController::error_events()
 {
-    TCPPacketBye *packet = new TCPPacketBye();
+    UDPPacketBye *packet = new UDPPacketBye(this->messageId++);
     this->socket.sendPacket(packet);
     this->state = STATE_END;
 }
 
 //helping methods
-void TCPController::handle_packet(SenderInput command)
+void UDPController::handle_packet(SenderInput command)
 {
+    uint16_t messageId = 0;
     if(command.packet->getType() == REPLY)
     {
-        std::cerr << dynamic_cast<TCPPacketReply*>(command.packet)->getMessage();
+        std::cerr << dynamic_cast<UDPPacketReply*>(command.packet)->getMessage();
+        messageId = dynamic_cast<UDPPacketReply*>(command.packet)->getMessageId();
     }
     else if(command.packet->getType() == MSG)
     {
-        std::cout << dynamic_cast<TCPPacketMsg*>(command.packet)->getMessage();
+        std::cerr << dynamic_cast<UDPPacketMsg*>(command.packet)->getMessage();
+        messageId = dynamic_cast<UDPPacketMsg*>(command.packet)->getMessageId();
     }
     else if(command.packet->getType() == ERR)
     {
-        std::cerr << dynamic_cast<TCPPacketErr*>(command.packet)->getMessage();
+        std::cerr << dynamic_cast<UDPPacketErr*>(command.packet)->getMessage();
+        messageId = dynamic_cast<UDPPacketErr*>(command.packet)->getMessageId();
     }
-    else if(command.packet->getType() == BYE)
-    {
-        int_handler();
-        exit(0);
-    }
+    this->socket.sendPacket(new UDPPacketConfirm(messageId));
 }
 
-void TCPController::handle_command(SenderInput command)
+void UDPController::handle_command(SenderInput command)
 {
     if(command.is_packet)
     {
@@ -304,14 +300,21 @@ void TCPController::handle_command(SenderInput command)
 
     if(command.command[0] == COMAUTH)
     {
-        TCPPacketAuth *packet = new TCPPacketAuth(command.command[1], command.command[2], command.command[3]);
-        this->displayName = command.command[3];
-        this->socket.sendPacket(packet);
+        UDPPacketAuth *packet = new UDPPacketAuth(this->messageId++, command.command[1], command.command[2], command.command[3]);
+        if(this->socket.sendPacket(packet))
+        {
+            std::cerr << "ERR: Not received Confirm packet.\n";
+            exit(1);
+        }
     }
     else if(command.command[0] == COMJOIN)
     {
-        TCPPacketJoin *packet = new TCPPacketJoin(command.command[1], this->displayName);
-        this->socket.sendPacket(packet);
+        UDPPacketJoin *packet = new UDPPacketJoin(this->messageId++, command.command[1], this->displayName);
+        if(this->socket.sendPacket(packet))
+        {
+            std::cerr << "ERR: Not received Confirm packet.\n";
+            exit(1);
+        }
     }
     else if(command.command[0] == COMRENAME)
     {
@@ -324,12 +327,16 @@ void TCPController::handle_command(SenderInput command)
     else
     {
         //message
-        TCPPacketMsg *packet = new TCPPacketMsg(this->displayName, command.command[0]);
-        this->socket.sendPacket(packet);
+        UDPPacketMsg *packet = new UDPPacketMsg(this->messageId++, this->displayName, command.command[0]);
+        if(this->socket.sendPacket(packet))
+        {
+            std::cerr << "ERR: Not received Confirm packet.\n";
+            exit(1);
+        }
     }
 }
 
-void TCPController::read_from_stdin()
+void UDPController::read_from_stdin()
 {
     std::string commStr;
 
@@ -340,12 +347,7 @@ void TCPController::read_from_stdin()
     ret = poll(&fds, 1, 0);
     if(ret == 1)
     {
-        getline(std::cin, commStr);
-        if(std::cin.eof())//Ctrl D iterrupt
-        {
-            int_handler();
-            exit(0);
-        }
+        getline(std::cin, commStr);//TODO: co ak prazdny string
         getCommand(&this->commands, commStr);
     }
     else if(ret == 0){}
@@ -356,10 +358,11 @@ void TCPController::read_from_stdin()
     }
 }
 
-void TCPController::read_from_socket()
+void UDPController::read_from_socket()
 {
     if(this->socket.dataAvailable() > 0)
     {
+        std::cerr << "DEBUG RECEIVEPACKET\n";
         std::string data = this->socket.receiveData();
         Packet* packet = resolvePacket(data);
 
@@ -371,13 +374,7 @@ void TCPController::read_from_socket()
     }
 }
 
-void TCPController::int_handler()
-{
-    TCPPacketBye *packet = new TCPPacketBye();
-    this->socket.sendPacket(packet);
-}
 
-// /auth xsajko01 otravnyPomaranc 9c7150a2-15b7-4dbc-8ee4-b14a25d93257
-// REPLY OK IS Auth success.
-// MSG FROM server_user IS sa uvedooom!!!
-// ERR FROM server_user IS {MessageContent}
+void UDPController::int_handler(){
+    
+}
