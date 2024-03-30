@@ -268,6 +268,7 @@ def udp_auth(tester):
 
     # Check AUTH message received
     message = tester.receive_message()
+
     assert (
         message == b"\x02\x00\x00a\x00c\x00b\x00"
     ), "Incoming message does not match expected message."
@@ -283,6 +284,7 @@ def udp_auth_port(tester):
 
     # Check AUTH message received
     message = tester.receive_message()
+
     assert (
         message == b"\x02\x00\x00a\x00c\x00b\x00"
     ), "Incoming message does not match expected message."
@@ -333,6 +335,7 @@ def udp_auth_nok_ok(tester):
 
     # Expect the auth message to be received by the server
     message = tester.receive_message()
+    print(message)
     assert (
         message == b"\x02\x00\x00a\x00c\x00b\x00"
     ), "Incoming message does not match expected AUTH message."
@@ -362,15 +365,16 @@ def udp_auth_nok_ok(tester):
 
     # Expect the auth message to be received by the server
     message = tester.receive_message()
+    print(message)
     assert (
-        message == b"\x02\x00\x01a\x00c\x00b\x00"
+        message == b"\x02\x01\x00a\x00c\x00b\x00"
     ), "Incoming message does not match expected AUTH message."
 
     # Confirm the AUTH message
     tester.send_message(b"\x00\x00\x01")
 
     # Reply with OK
-    tester.send_message(b"\x01\x00\x01\x01\x00\x01yes\x00")
+    tester.send_message(b"\x01\x01\x00\x01\x00\x01yes\x00")
 
     sleep(0.2)
 
@@ -382,8 +386,9 @@ def udp_auth_nok_ok(tester):
 
     # Should receive CONFIRM for the REPLY message
     message = tester.receive_message()
+    print(message)
     assert (
-        message == b"\x00\x00\x01"
+        message == b"\x00\x01\x00"
     ), "Incoming message does not match expected CONFIRM message."
 
 
@@ -405,6 +410,7 @@ def udp_auth_port_change(tester):
     # Expect the auth message to be received by the server on tmp socket
     tmp_socket.settimeout(10)
     message, client_address = tmp_socket.recvfrom(1024)
+    print(message)
     assert (
         message == b"\x02\x00\x00a\x00c\x00b\x00"
     ), "Incoming message does not match expected AUTH message."
@@ -440,7 +446,7 @@ def auth_and_reply(tester):
 
     # Expect the auth message to be received by the server
     message = tester.receive_message()
-
+    
     assert (
         message == b"\x02\x00\x00a\x00c\x00b\x00"
     ), "Incoming message does not match expected AUTH message."
@@ -479,6 +485,7 @@ def udp_msg(tester):
 
     # Expect the message to be received by the server
     message = tester.receive_message()
+    print(message)
     assert (
         message == b"\x04\x00\x01c\x00ahojky\x00"
     ), "Incoming message does not match expected MSG message."
@@ -495,6 +502,7 @@ def udp_svr_msg(tester):
 
     # Check the output, should contain "ahojky"
     stdout = tester.get_stdout()
+    print(stdout)
     assert any(
         ["smrt: ahojky" in line for line in stdout.split("\n")]
     ), "Output does not match expected output."

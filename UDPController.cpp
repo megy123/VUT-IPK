@@ -4,6 +4,7 @@
 
 UDPController::UDPController(const char server_ip[],const char port[], int timeout, int retramsittions)
 {
+    this->ip = server_ip;
     this->socket = Socket(server_ip, port, SOCK_DGRAM);
     this->state = STATE_START;
     this->timeout = timeout;
@@ -136,7 +137,7 @@ void UDPController::auth_events()
             //handle awaiting packets
             if(!awaiting_packets.empty())
             {
-                if(command.packet->getType() == this->awaiting_packets.front())
+                if(command.packet->getType() == this->awaiting_packets.front() || command.packet->getType() == ERR)
                 {
                     this->awaiting_packets.pop();                
                 }
@@ -204,7 +205,7 @@ void UDPController::open_events()
             //handle awaiting packets
             if(!awaiting_packets.empty())
             {
-                if(command.packet->getType() == this->awaiting_packets.front())
+                if(command.packet->getType() == this->awaiting_packets.front() || command.packet->getType() == ERR)
                 {
                     this->awaiting_packets.pop();
                 }
@@ -279,13 +280,18 @@ void UDPController::handle_packet(SenderInput command)
     }
     else if(command.packet->getType() == MSG)
     {
-        std::cerr << dynamic_cast<UDPPacketMsg*>(command.packet)->getMessage();
+        std::cout << dynamic_cast<UDPPacketMsg*>(command.packet)->getMessage();
         messageId = dynamic_cast<UDPPacketMsg*>(command.packet)->getMessageId();
     }
     else if(command.packet->getType() == ERR)
     {
         std::cerr << dynamic_cast<UDPPacketErr*>(command.packet)->getMessage();
         messageId = dynamic_cast<UDPPacketErr*>(command.packet)->getMessageId();
+    }
+    else if(command.packet->getType() == BYE)
+    {
+        int_handler();
+        exit(0);
     }
     this->socket.sendPacket(new UDPPacketConfirm(messageId));
 }
@@ -301,6 +307,7 @@ void UDPController::handle_command(SenderInput command)
     if(command.command[0] == COMAUTH)
     {
         UDPPacketAuth *packet = new UDPPacketAuth(this->messageId++, command.command[1], command.command[2], command.command[3]);
+        this->displayName = command.command[3];
         if(this->socket.sendPacket(packet))
         {
             std::cerr << "ERR: Not received Confirm packet.\n";
@@ -348,6 +355,11 @@ void UDPController::read_from_stdin()
     if(ret == 1)
     {
         getline(std::cin, commStr);//TODO: co ak prazdny string
+        if(std::cin.eof())//Ctrl D iterrupt
+        {
+            int_handler();
+            exit(0);
+        }
         getCommand(&this->commands, commStr);
     }
     else if(ret == 0){}
@@ -362,9 +374,8 @@ void UDPController::read_from_socket()
 {
     if(this->socket.dataAvailable() > 0)
     {
-        std::cerr << "DEBUG RECEIVEPACKET\n";
         std::string data = this->socket.receiveData();
-        Packet* packet = resolvePacket(data);
+        Packet* packet = resolveUDPPacket(data);
 
         SenderInput newInput;
         newInput.is_packet = true;
@@ -374,7 +385,7 @@ void UDPController::read_from_socket()
     }
 }
 
-
 void UDPController::int_handler(){
-    
+    UDPPacketBye *packet = new UDPPacketBye(this->messageId++);
+    this->socket.sendPacket(packet);
 }

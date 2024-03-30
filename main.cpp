@@ -5,7 +5,7 @@
 #include "Parser.h"
 #include <signal.h>
 
-TCPController* controller;
+UDPController* controller;
 
 void handle(int i)
 {
@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
     //TCP connection
 
     //147.229.8.244 -- anton5.fit.vutbr.cz
-    controller = new TCPController("127.0.0.1", "4567");
+    controller = new UDPController("127.0.0.1", "4567", 250, 3);
     
     struct sigaction sigIntHandler;
 
@@ -98,12 +98,9 @@ int main(int argc, char *argv[])
     sigIntHandler.sa_flags = 0;
 
     sigaction(SIGINT, &sigIntHandler, NULL);
-    sigaction(SIGQUIT, &sigIntHandler, NULL);
 
     
     controller->chat();
-    
-
 
     return 0;
 }

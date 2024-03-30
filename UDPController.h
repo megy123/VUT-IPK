@@ -13,18 +13,16 @@
 
 class UDPController {
 private:
+    std::string ip;
     Socket socket;
     int timeout;
     int retramsittions;
     int messageId;
     std::queue<PacketType> awaiting_packets;
 
-
     std::queue<struct SenderInput> commands;
     FSMStates state;
     std::string displayName;
-    std::mutex command_data_mux;
-    std::mutex receiver_mux;
 
     std::string getPacketMessage(Packet* packet);
     void read_from_stdin();

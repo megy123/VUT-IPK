@@ -75,7 +75,7 @@ uint16_t UDPPacketReply::getMessageId()
 }
 
 //AUTH packet
-UDPPacketAuth::UDPPacketAuth(uint16_t messageId, std::string username, std::string displayName, std::string secret)
+UDPPacketAuth::UDPPacketAuth(uint16_t messageId, std::string username, std::string secret, std::string displayName)
 {
     this->username = username;
     this->displayName = displayName;

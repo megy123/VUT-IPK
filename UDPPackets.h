@@ -49,7 +49,7 @@ private:
 
 public:
     PacketType getType();
-    UDPPacketAuth(uint16_t messageId, std::string username, std::string displayName, std::string secret);
+    UDPPacketAuth(uint16_t messageId, std::string username, std::string secret, std::string displayName);
 
     std::string getData();
     uint16_t getMessageId();

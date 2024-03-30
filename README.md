@@ -33,6 +33,9 @@ Pre úplné pochopenie projektu bolo potrebné naštudovať ako funguje komunik�
 ## Odkazy
 
 [Zadanie projektu](https://git.fit.vutbr.cz/NESFIT/IPK-Projects-2024/src/branch/master/Project%201)
+
 [C++ dokumentácia](https://en.cppreference.com/w/)
+
 [Wireshark](https://www.wireshark.org/)
+
 [NetCat](https://nc110.sourceforge.io/)

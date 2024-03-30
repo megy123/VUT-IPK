@@ -223,11 +223,8 @@ Packet* resolveUDPPacket(std::string receivedMsg)
     splitMsg[0] = receivedMsg[1];
     splitMsg[1] = receivedMsg[2];
 
-    //std::cerr  << std::hex << receivedMsg[1] << std::hex << receivedMsg[2];
     std::memcpy(&msgId, &splitMsg, 2);
     msgId = ntohs(msgId);
-
-    //std::cerr << msgId << "<-- msgid ";
 
     switch (receivedMsg[0])
     {
@@ -258,7 +255,7 @@ Packet* resolveUDPPacket(std::string receivedMsg)
             std::memcpy(&refMsgId, &splitMessage, 2);
             
             std::string Message;
-            for(int i = 5;i<receivedMsg.size();i++)
+            for(int i = 6;i<receivedMsg.size();i++)
             {
 
                 Message += receivedMsg[i];
@@ -350,7 +347,7 @@ Packet* resolveUDPPacket(std::string receivedMsg)
             return new UDPPacketJoin(msgId, chanelID, displayName);
             break;
         }
-    case '\x05'://MSG
+    case '\x04'://MSG
         {
             std::string msgContent;
             std::string displayName;

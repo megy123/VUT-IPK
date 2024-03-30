@@ -45,12 +45,32 @@ Socket::Socket(const char server_ip[], const char port[], int socktype){
         exit(1);
     }
 
+
+    sockaddr_in sendAddr;
+	sendAddr.sin_family = AF_INET;
+    sendAddr.sin_addr.s_addr = inet_addr(server_ip);
+	sendAddr.sin_port = htons(4567);
+
+    this->listenAddr = sendAddr;
+
+    //binding
+    sockaddr_in recvAddress;
+	recvAddress.sin_family = AF_INET;
+	recvAddress.sin_addr.s_addr = INADDR_ANY;
+	recvAddress.sin_port = 0;
+
+	if (bind(this->soc, (const sockaddr*)&recvAddress, sizeof(sockaddr_in)) < 0)
+	{
+		std::cerr << "Failed to bind socket." << std::endl;
+		return;
+	}
+
     //connect
-    if(connect(this->soc, server_info->ai_addr, server_info->ai_addrlen) < 0)
-    {
-        std::cerr << "Failed to connect.\n";
-        exit(1);        
-    }
+    // if(connect(this->soc, server_info->ai_addr, server_info->ai_addrlen) < 0)
+    // {
+    //     std::cerr << "Failed to connect.\n";
+    //     exit(1);        
+    // }
 }
 
 int Socket::sendPacket(Packet *packet)
@@ -97,8 +117,6 @@ int Socket::sendPacket(Packet *packet)
             break;
         }
 
-
-
         int retransmissions = 3;
 
         fd_set fds = { 0 }; // will be checked for being ready to read
@@ -113,8 +131,8 @@ int Socket::sendPacket(Packet *packet)
 
         while(retransmissions > 0){
             //send data
-            send(this->soc, data.c_str(), data.size(), 0);
-
+            sendto(this->soc, data.c_str(), data.size(), 0,(struct sockaddr*)&this->listenAddr, sizeof(this->listenAddr));
+            if(packet->getType() == CONFIRM)return 0;
 
             int ret = select( this->soc + 1, &fds, NULL, NULL, &tv);
             if (  ret < 0 )
@@ -135,6 +153,7 @@ int Socket::sendPacket(Packet *packet)
                 Packet* confirm = resolveUDPPacket(data);
                 if(confirm->getType() != CONFIRM)return 1;
                 if(dynamic_cast<UDPPacketConfirm *>(confirm)->getMessageId() > messageId)return 1;
+                
                 
                 return 0;
             }
@@ -172,7 +191,7 @@ int Socket::sendPacket(Packet *packet)
         }
 
         //send data
-        send(this->soc, data.c_str(), strlen(data.c_str()), 0);
+        sendto(this->soc, data.c_str(), strlen(data.c_str()), 0,(struct sockaddr*)&this->listenAddr, sizeof(this->listenAddr));
     }
     return 0;
 }
@@ -182,7 +201,8 @@ std::string Socket::receiveData()
     //receive data
     std::string output;
     char buffer[1024] = {0};
-    int num = read(this->soc, buffer, 1024);
+    socklen_t cliAddrLen = sizeof(this->listenAddr);
+    int num = recvfrom(this->soc, buffer, 1024, 0, (struct sockaddr*)&this->listenAddr, &cliAddrLen);
     for(int i=0;i<num;i++)
     {
         output += buffer[i];
@@ -198,8 +218,19 @@ bool Socket::dataAvailable()
     return count;
 }
 
-void rebindSocket(int port)
+int Socket::rebindSocket()
 {
-    struct sockaddr_in newAddr;
+    sockaddr_in clientAddress;
+	clientAddress.sin_family = AF_INET;
+	clientAddress.sin_addr.s_addr = INADDR_ANY;
+	clientAddress.sin_port = 0;
 
+    socklen_t length;
+    length = sizeof(clientAddress);
+
+    int soc1 = accept(soc,(struct sockaddr*)&clientAddress, &length);
+    // if(soc1<0){
+    //     std::cerr << "ERR: Unable to accept new connection.\n";
+    // }
+    return soc1;
 }
