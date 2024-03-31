@@ -1,3 +1,9 @@
+/*
+Project:    IPK 1. projekt
+File:       main.cpp
+Authors:    Dominik Sajko (xsajko01)
+Date:       31.03.2024
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include "TCPController.h"
@@ -83,15 +89,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    // std::cout << "ip: \t\t" << args.ip << "\n";
-    // std::cout << "port: \t\t" << args.port << "\n";
-    // std::cout << "protocol: \t\t" << args.protocol << "\n";
-    // std::cout << "timeout: \t\t" << args.timeout << "\n";
-    // std::cout << "transmision: \t\t" << args.transmissions << "\n";
-
-
     //--PROGRAM CONTROL--
-    //147.229.8.244 -- anton5.fit.vutbr.cz
 
     //create controller
     if(args.protocol == TCP)

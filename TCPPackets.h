@@ -1,3 +1,9 @@
+/*
+Project:    IPK 1. projekt
+File:       TCPPackets.h
+Authors:    Dominik Sajko (xsajko01)
+Date:       31.03.2024
+*/
 #ifndef TCP_PACKETS
 #define TCP_PACKETS
 

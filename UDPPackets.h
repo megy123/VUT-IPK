@@ -1,3 +1,9 @@
+/*
+Project:    IPK 1. projekt
+File:       UDPPackets.h
+Authors:    Dominik Sajko (xsajko01)
+Date:       31.03.2024
+*/
 #ifndef UDP_PACKETS
 #define UDP_PACKETS
 

@@ -1,30 +1,22 @@
+# Project: IPK 1. projekt
 # File: MakeFile
-# Project: IPK1
-# Date: 12.4.2023
-# Author: Dominik Sajko xsajko01, FIT
+# Author: Dominik Sajko (xsajko01)
+# Date: 31.03.2024
 
 CC = g++
 CFLAGS = -std=c++20 -Wall -Wextra -Werror -pedantic
-
-# Get all .cc files
 SRCS = $(wildcard *.cpp)
-# Get corresponding .o files
 OBJS := $(SRCS:%.cpp=%.o)
-# Get corresponding .d files
-DEPS := $(SRCS:%.cpp=%.d)
 
-.PHONY: clean
-
-
-#object files
-#TCPController.o: TCPController.cpp TCPController.h
-#	$(CC) $(CFLAGS) -c -o TCPController.o TCPController.cpp
+.PHONY: clean zip
 
 # Main target
-ipk: $(OBJS)
+ipk24chat-client: $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $^
 
 #utils
+zip:
+	zip xsajko01.zip *.cpp *.h MakeFile CHANGELOG.md LICENCE class_diagram.png
 
 clean:
-	rm -f *.o *.a *.so ipk
+	rm -f *.o ipk24chat-client

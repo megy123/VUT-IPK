@@ -1,15 +1,19 @@
+/*
+Project:    IPK 1. projekt
+File:       UDPController.h
+Authors:    Dominik Sajko (xsajko01)
+Date:       31.03.2024
+*/
 #ifndef UDPCON
 #define UDPCON
 
 #include "Controller.h"
 #include "socket.h"
 #include "MyPacket.h"
-#include <atomic>
-#include <mutex>
 #include <queue>
 #include "TCPController.h"
 #include <iostream>
-#include "parser.h"
+#include "Parser.h"
 #include <sys/poll.h>
 
 class UDPController: public Controller {

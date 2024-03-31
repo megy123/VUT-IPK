@@ -1,3 +1,9 @@
+/*
+Project:    IPK 1. projekt
+File:       TCPController.cpp
+Authors:    Dominik Sajko (xsajko01)
+Date:       31.03.2024
+*/
 #include "TCPController.h"
 #include <iostream>
 #include <string>
@@ -5,9 +11,6 @@
 #include "Parser.h"
 #include "TCPPackets.h"
 #include <sys/poll.h>
-#include <chrono>
-#include <thread>
-#include <utility>
 #include <sys/socket.h>
 
 TCPController::TCPController(const char server_ip[], const char port[])
@@ -48,39 +51,36 @@ void TCPController::chat()
 {
     while(this->state != STATE_END)
     {
-        if(true)
-        {
-            //get input
-            if(this->awaiting_packets.empty())read_from_stdin();
-            read_from_socket();
+        //get input
+        if(this->awaiting_packets.empty())read_from_stdin();
+        read_from_socket();
 
-            //fsm
-            switch(this->state)
+        //fsm
+        switch(this->state)
+        {
+            case STATE_START:
             {
-                case STATE_START:
-                {
-                    start_events();
-                    break;
-                }
-                case STATE_AUTH:
-                {
-                    auth_events();
-                    break;
-                }
-                case STATE_OPEN:
-                {                
-                    open_events();
-                    break;
-                }                            
-                case STATE_ERROR:
-                {
-                    error_events();
-                    break;
-                }
-                case STATE_END:
-                {
-                    break;
-                }
+                start_events();
+                break;
+            }
+            case STATE_AUTH:
+            {
+                auth_events();
+                break;
+            }
+            case STATE_OPEN:
+            {                
+                open_events();
+                break;
+            }                            
+            case STATE_ERROR:
+            {
+                error_events();
+                break;
+            }
+            case STATE_END:
+            {
+                break;
             }
         }
     }
@@ -339,11 +339,15 @@ void TCPController::handle_command(SenderInput command)
     }
     else if(command.command[0] == COMHELP)
     {
-        std::cout << "helpMessage\n";
+        std::cout << "Commands\n"
+                  << "/auth {Username} {Secret} {DisplayName}\n"
+                  << "/join {ChannelID}\n"
+                  << "/rename {DisplayName}\n"
+                  << "/help";
     }
     else
     {
-        //message
+        //message packet
         TCPPacketMsg *packet = new TCPPacketMsg(this->displayName, command.command[0]);
         this->socket.sendPacket(packet);
     }
@@ -355,7 +359,7 @@ void TCPController::read_from_stdin()
 
     struct pollfd fds;
     int ret;
-    fds.fd = 0; /* this is STDIN */
+    fds.fd = 0; // 0 = stdin
     fds.events = POLLIN;
     ret = poll(&fds, 1, 0);
     if(ret == 1)
@@ -371,7 +375,7 @@ void TCPController::read_from_stdin()
     else if(ret == 0){}
     else
     {
-        std::cerr << "Error while reading from stdin\n";
+        std::cerr << "ERR: Error while reading from stdin\n";
         exit(1);
     }
 }
@@ -396,9 +400,3 @@ void TCPController::int_handler()
     TCPPacketBye *packet = new TCPPacketBye();
     this->socket.sendPacket(packet);
 }
-
-
-// /auth xsajko01 9c7150a2-15b7-4dbc-8ee4-b14a25d93257 otravnyPomaranc
-// REPLY OK IS Auth success.
-// MSG FROM server_user IS sa uvedooom!!!
-// ERR FROM server_user IS {MessageContent}

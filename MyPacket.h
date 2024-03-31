@@ -1,8 +1,15 @@
+/*
+Project:    IPK 1. projekt
+File:       MyPacket.h
+Authors:    Dominik Sajko (xsajko01)
+Date:       31.03.2024
+*/
 #ifndef PACKET
 #define PACKET
 
 #include <string>
 #include <map>
+#include <cstdint>
 
 enum PacketType{
     NONE,

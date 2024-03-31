@@ -1,11 +1,15 @@
+/*
+Project:    IPK 1. projekt
+File:       TCPController.h
+Authors:    Dominik Sajko (xsajko01)
+Date:       31.03.2024
+*/
 #ifndef TCPCON
 #define TCPCON
 
 #include "Controller.h"
 #include "socket.h"
 #include "MyPacket.h"
-#include <atomic>
-#include <mutex>
 #include <queue>
 
 enum FSMStates{

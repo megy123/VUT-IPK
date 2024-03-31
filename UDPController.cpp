@@ -1,3 +1,9 @@
+/*
+Project:    IPK 1. projekt
+File:       UDPController.cpp
+Authors:    Dominik Sajko (xsajko01)
+Date:       31.03.2024
+*/
 #include "UDPController.h"
 #include "UDPPackets.h"
 #include <sys/socket.h>
@@ -45,43 +51,39 @@ void UDPController::chat()
 {
     while(this->state != STATE_END)
     {
-        if(true)
+        //get input
+        if(this->awaiting_packets.empty())read_from_stdin();
+        read_from_socket();
+        
+        //fsm
+        switch(this->state)
         {
-            //get input
-            if(this->awaiting_packets.empty())read_from_stdin();
-            read_from_socket();
-            
-            //fsm
-            switch(this->state)
+            case STATE_START:
             {
-                case STATE_START:
-                {
-                    start_events();
-                    break;
-                }
-                case STATE_AUTH:
-                {
-                    auth_events();
-                    break;
-                }
-                case STATE_OPEN:
-                {                
-                    open_events();
-                    break;
-                }                            
-                case STATE_ERROR:
-                {
-                    error_events();
-                    break;
-                }
-                case STATE_END:
-                {
-                    break;
-                }
+                start_events();
+                break;
+            }
+            case STATE_AUTH:
+            {
+                auth_events();
+                break;
+            }
+            case STATE_OPEN:
+            {                
+                open_events();
+                break;
+            }                            
+            case STATE_ERROR:
+            {
+                error_events();
+                break;
+            }
+            case STATE_END:
+            {
+                break;
             }
         }
     }
-
 }
 
 //FSM states
@@ -139,6 +141,16 @@ void UDPController::auth_events()
 
         if(command.is_packet)
         {
+            //invalid command
+            if(command.packet == nullptr)
+            {
+                std::cerr << "ERR: Invalid packet received.\n";
+                UDPPacketErr* packet = new UDPPacketErr(this->messageId++, this->displayName, "Invalid packet received.");
+                this->socket.sendPacket(packet);
+                this->state = STATE_ERROR;
+                return;
+            }
+
             //handle awaiting packets
             if(!awaiting_packets.empty())
             {
@@ -207,6 +219,16 @@ void UDPController::open_events()
 
         if(command.is_packet)
         {
+            //invalid command
+            if(command.packet == nullptr)
+            {
+                std::cerr << "ERR: Invalid packet received.\n";
+                UDPPacketErr* packet = new UDPPacketErr(this->messageId++, this->displayName, "Invalid packet received.");
+                this->socket.sendPacket(packet);
+                this->state = STATE_ERROR;
+                return;
+            }
+
             //handle awaiting packets
             if(!awaiting_packets.empty())
             {
@@ -334,7 +356,11 @@ void UDPController::handle_command(SenderInput command)
     }
     else if(command.command[0] == COMHELP)
     {
-        std::cout << "helpMessage\n";
+        std::cout << "Commands\n"
+                  << "/auth {Username} {Secret} {DisplayName}\n"
+                  << "/join {ChannelID}\n"
+                  << "/rename {DisplayName}\n"
+                  << "/help";
     }
     else
     {
@@ -354,12 +380,13 @@ void UDPController::read_from_stdin()
 
     struct pollfd fds;
     int ret;
-    fds.fd = 0; /* this is STDIN */
+    fds.fd = 0; // 0 = stdin
     fds.events = POLLIN;
+
     ret = poll(&fds, 1, 0);
     if(ret == 1)
     {
-        getline(std::cin, commStr);//TODO: co ak prazdny string
+        getline(std::cin, commStr);
         if(std::cin.eof())//Ctrl D iterrupt
         {
             int_handler();
@@ -370,7 +397,7 @@ void UDPController::read_from_stdin()
     else if(ret == 0){}
     else
     {
-        std::cerr << "Error while reading from stdin\n";
+        std::cerr << "ERR: Error while reading from stdin\n";
         exit(1);
     }
 }

@@ -1,3 +1,9 @@
+/*
+Project:    IPK 1. projekt
+File:       socket.h
+Authors:    Dominik Sajko (xsajko01)
+Date:       31.03.2024
+*/
 #ifndef TCPSOC
 #define TCPSOC
 
@@ -8,7 +14,7 @@ class Socket{
 private:
     int soc;
     int protocol;
-    sockaddr_in listenAddr;
+    sockaddr_in senderAddress;
 
 public:
     Socket();

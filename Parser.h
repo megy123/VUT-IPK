@@ -1,3 +1,9 @@
+/*
+Project:    IPK 1. projekt
+File:       Parser.h
+Authors:    Dominik Sajko (xsajko01)
+Date:       31.03.2024
+*/
 #ifndef PARSER
 #define PARSER
 
@@ -6,9 +12,6 @@
 #include <string>
 #include <bits/stdc++.h>
 #include "MyPacket.h"
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
 #include <queue>
 #include "TCPController.h"

@@ -1,8 +1,12 @@
+/*
+Project:    IPK 1. projekt
+File:       Parser.cpp
+Authors:    Dominik Sajko (xsajko01)
+Date:       31.03.2024
+*/
 #include "Parser.h"
 #include "TCPPackets.h"
 #include "UDPPackets.h"
-#include <getopt.h>
-#include <arpa/inet.h>
 
 //helper functions
 std::string getDataToEnd(std::vector<std::string> data, int index)
@@ -63,16 +67,32 @@ bool validMessage(std::string data)
     return true;
 }
 
+std::string getString(std::string *data, int *index)
+{
+    std::string output;
+    while((*data)[*index]!='\x00')
+    {
+        
+        output += (*data)[*index];
+        if(*index == (*data).size())
+        {    
+            std::cerr << "ERR: Invalid packet structure.\n";
+            exit(1);
+        }
+        (*index)++;
+    }
+    return output;
+}
+
 //parsing functions
 void getCommand(std::queue<struct SenderInput> *output, std::string commStr)
 {
     std::vector<std::string> command;
-    int start, end;
-    start = end = 0;
-    char dl = ' ';
+    int start = 0;
+    int end = 0;
     //read command
-    while ((start = commStr.find_first_not_of(dl, end)) != std::string::npos) {
-        end = commStr.find(dl, start);
+    while ((start = commStr.find_first_not_of(' ', end)) != std::string::npos) {
+        end = commStr.find(' ', start);
         command.push_back(commStr.substr(start, end - start));
     }
 
@@ -145,11 +165,10 @@ Packet* resolvePacket(std::string receivedMsg)
     
     //split packet
     std::vector<std::string> packetData;
-    int start, end;
-    start = end = 0;
-    char dl = ' ';
-    while ((start = receivedMsg.find_first_not_of(dl, end)) != std::string::npos) {
-        end = receivedMsg.find(dl, start);
+    int start = 0;
+    int end = 0;
+    while ( (start = receivedMsg.find_first_not_of(' ', end)) != std::string::npos ) {
+        end = receivedMsg.find(' ', start);
         packetData.push_back(receivedMsg.substr(start, end - start));
     }
 
@@ -219,8 +238,8 @@ Packet* resolveUDPPacket(std::string receivedMsg)
     splitMsg[0] = receivedMsg[1];
     splitMsg[1] = receivedMsg[2];
     std::memcpy(&msgId, &splitMsg, 2);
-    //msgId = ntohs(msgId);
 
+    //resolve packet
     switch (receivedMsg[0])
     {
     case '\x00'://CONFIRM
@@ -245,6 +264,7 @@ Packet* resolveUDPPacket(std::string receivedMsg)
                 exit(1);
             }
 
+            //get ref id
             uint16_t refMsgId;
             std::string splitMessage = receivedMsg.substr(4,2);
             std::memcpy(&refMsgId, &splitMessage, 2);
@@ -252,7 +272,6 @@ Packet* resolveUDPPacket(std::string receivedMsg)
             std::string Message;
             for(int i = 6;i<receivedMsg.size();i++)
             {
-
                 Message += receivedMsg[i];
                 if(receivedMsg[i] == '\x00')break;
             }
@@ -268,45 +287,15 @@ Packet* resolveUDPPacket(std::string receivedMsg)
             int index = 3;
 
             //get username
-            while(receivedMsg[index]!='\x00')
-            {
-                
-                username += receivedMsg[index];
-                if(index == receivedMsg.size())
-                {    
-                    std::cerr << "ERR: Invalid packet structure.\n";
-                    exit(1);
-                }
-                index++;
-            }
+            username = getString(&receivedMsg, &index);
 
             //get display name
             index++;
-            while(receivedMsg[index]!='\x00')
-            {
-                
-                displyName += receivedMsg[index];
-                if(index == receivedMsg.size())
-                {    
-                    std::cerr << "ERR: Invalid packet structure.\n";
-                    exit(1);
-                }
-                index++;
-            }
+            displyName = getString(&receivedMsg, &index);
 
             //get secret
             index++;
-            while(receivedMsg[index]!='\x00')
-            {
-                
-                pass += receivedMsg[index];
-                if(index == receivedMsg.size())
-                {    
-                    std::cerr << "ERR: Invalid packet structure.\n";
-                    exit(1);
-                }
-                index++;
-            }
+            pass = getString(&receivedMsg, &index);
             
             return new UDPPacketAuth(msgId, username, displyName, pass);
             break;
@@ -317,30 +306,12 @@ Packet* resolveUDPPacket(std::string receivedMsg)
             std::string displayName;
             int index = 3;
 
-            while(receivedMsg[index]!='\x00')
-            {
-                
-                chanelID += receivedMsg[index];
-                if(index == receivedMsg.size())
-                {    
-                    std::cerr << "ERR: Invalid packet structure.\n";
-                    exit(1);
-                }
-                index++;
-            }
+            //get chanelId
+            chanelID = getString(&receivedMsg, &index);
 
+            //get DisplayName
             index++;
-            while(receivedMsg[index]!='\x00')
-            {
-                
-                displayName += receivedMsg[index];
-                if(index == receivedMsg.size())
-                {    
-                    std::cerr << "ERR: Invalid packet structure.\n";
-                    exit(1);
-                }
-                index++;
-            }
+            displayName = getString(&receivedMsg, &index);
 
             return new UDPPacketJoin(msgId, chanelID, displayName);
             break;
@@ -351,30 +322,12 @@ Packet* resolveUDPPacket(std::string receivedMsg)
             std::string displayName;
             int index = 3;
 
-            while(receivedMsg[index]!='\x00')
-            {
-                
-                displayName += receivedMsg[index];
-                if(index == receivedMsg.size())
-                {    
-                    std::cerr << "ERR: Invalid packet structure.\n";
-                    exit(1);
-                }
-                index++;
-            }
+            //get displayName
+            displayName = getString(&receivedMsg, &index);
 
+            //get Message
             index++;
-            while(receivedMsg[index]!='\x00')
-            {
-                
-                msgContent += receivedMsg[index];
-                if(index == receivedMsg.size())
-                {    
-                    std::cerr << "ERR: Invalid packet structure.\n";
-                    exit(1);
-                }
-                index++;
-            }
+            msgContent = getString(&receivedMsg, &index);
 
             return new UDPPacketMsg(msgId, displayName, msgContent);
             break;
@@ -385,30 +338,12 @@ Packet* resolveUDPPacket(std::string receivedMsg)
             std::string displayName;
             int index = 3;
 
-            while(receivedMsg[index]!='\x00')
-            {
-                
-                displayName += receivedMsg[index];
-                if(index == receivedMsg.size())
-                {    
-                    std::cerr << "ERR: Invalid packet structure.\n";
-                    exit(1);
-                }
-                index++;
-            }
+            //get displayName
+            displayName = getString(&receivedMsg, &index);
 
+            //get Message
             index++;
-            while(receivedMsg[index]!='\x00')
-            {
-                
-                msgContent += receivedMsg[index];
-                if(index == receivedMsg.size())
-                {    
-                    std::cerr << "ERR: Invalid packet structure.\n";
-                    exit(1);
-                }
-                index++;
-            }
+            msgContent = getString(&receivedMsg, &index);
 
             return new UDPPacketErr(msgId, displayName, msgContent);
             break;

@@ -1,3 +1,9 @@
+/*
+Project:    IPK 1. projekt
+File:       TCPPackets.cpp
+Authors:    Dominik Sajko (xsajko01)
+Date:       31.03.2024
+*/
 #include "TCPPackets.h"
 
 //ERR packet

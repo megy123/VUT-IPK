@@ -1,3 +1,9 @@
+/*
+Project:    IPK 1. projekt
+File:       UDPPackets.cpp
+Authors:    Dominik Sajko (xsajko01)
+Date:       31.03.2024
+*/
 #include "UDPPackets.h"
 
 //ERR packet

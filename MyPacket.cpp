@@ -1,3 +1,9 @@
+/*
+Project:    IPK 1. projekt
+File:       MyPacket.cpp
+Authors:    Dominik Sajko (xsajko01)
+Date:       31.03.2024
+*/
 #include "MyPacket.h"
 
 std::string Packet::getUDPHeader(PacketType type, uint16_t messageID)
