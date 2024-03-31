@@ -925,7 +925,7 @@ def tcp_auth_nok_ok(tester):
 # Helper function
 def tcp_auth_and_reply(tester):
     tester.start_server("tcp", 4567)
-    tester.setup(args=["-t", "tcp", "-s", "localhost", "-p", "4567"])
+    tester.setup(args=["-t", "tcp", "-s", "localhost", "-p", "4567", "-d", "1000"])
 
     # Send AUTH command
     tester.execute("/auth a b c")
