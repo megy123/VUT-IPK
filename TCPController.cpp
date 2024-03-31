@@ -39,6 +39,11 @@ std::string TCPController::getPacketMessage(Packet* packet)
     return "";
 }
 
+ControllerType TCPController::getType()
+{
+    return TCPCONT;
+}
+
 void TCPController::chat()
 {
     while(this->state != STATE_END)
@@ -98,6 +103,8 @@ void TCPController::start_events()
             if(command.is_packet)
             {
                 std::cerr << "ERR: Received invalid packet.\n";
+                TCPPacketErr* packet = new TCPPacketErr(this->displayName, "Invalid packet received.");
+                this->socket.sendPacket(packet);
                 this->state = STATE_ERROR;
             }
             else
@@ -137,6 +144,16 @@ void TCPController::auth_events()
 
         if(command.is_packet)
         {
+            //invalid command
+            if(command.packet == nullptr)
+            {
+                std::cerr << "ERR: Invalid packet received.\n";
+                TCPPacketErr* packet = new TCPPacketErr(this->displayName, "Invalid packet received.");
+                this->socket.sendPacket(packet);
+                this->state = STATE_ERROR;
+                return;
+            }
+
             //handle awaiting packets
             if(!awaiting_packets.empty())
             {
@@ -147,6 +164,8 @@ void TCPController::auth_events()
                 else
                 {
                     std::cerr << "ERR: Invalid packet received. Awaiting another packet type!\n";
+                    TCPPacketErr* packet = new TCPPacketErr(this->displayName, "Invalid packet received.");
+                    this->socket.sendPacket(packet);
                     this->state = STATE_ERROR;
                     return;
                 }
@@ -167,12 +186,6 @@ void TCPController::auth_events()
                 this->socket.sendPacket(packet);
                 this->state = STATE_END;
             }
-            else
-            {
-                std::cerr << "ERR: Invalid packet received.\n";
-                this->state = STATE_ERROR;
-            }
-
         }
         else
         {
@@ -205,6 +218,16 @@ void TCPController::open_events()
 
         if(command.is_packet)
         {
+            //invalid command
+            if(command.packet == nullptr)
+            {
+                std::cerr << "ERR: Invalid packet received.\n";
+                TCPPacketErr* packet = new TCPPacketErr(this->displayName, "Invalid packet received.");
+                this->socket.sendPacket(packet);
+                this->state = STATE_ERROR;
+                return;
+            }
+
             //handle awaiting packets
             if(!awaiting_packets.empty())
             {
@@ -215,6 +238,8 @@ void TCPController::open_events()
                 else
                 {
                     std::cerr << "ERR: Invalid packet received. Awaiting another packet type!\n";
+                    TCPPacketErr* packet = new TCPPacketErr(this->displayName, "Invalid packet received.");
+                    this->socket.sendPacket(packet);
                     this->state = STATE_ERROR;
                     return;
                 }
@@ -237,11 +262,6 @@ void TCPController::open_events()
             {
                 handle_packet(command);
                 this->state = STATE_END;
-            }
-            else
-            {
-                std::cerr << "ERR: Invalid packet to send.\n";
-                this->state = STATE_ERROR;
             }
         }
         else
@@ -377,7 +397,8 @@ void TCPController::int_handler()
     this->socket.sendPacket(packet);
 }
 
-// /auth xsajko01 otravnyPomaranc 9c7150a2-15b7-4dbc-8ee4-b14a25d93257
+
+// /auth xsajko01 9c7150a2-15b7-4dbc-8ee4-b14a25d93257 otravnyPomaranc
 // REPLY OK IS Auth success.
 // MSG FROM server_user IS sa uvedooom!!!
 // ERR FROM server_user IS {MessageContent}

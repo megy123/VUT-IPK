@@ -1,7 +1,6 @@
 #include "Parser.h"
 #include "TCPPackets.h"
 #include "UDPPackets.h"
-#include <string.h>
 #include <getopt.h>
 #include <arpa/inet.h>
 
@@ -10,7 +9,7 @@ std::string getDataToEnd(std::vector<std::string> data, int index)
 {
     std::string output = "";
 
-    for(int i = index; i < data.size(); i++)// -2 is for \r\n
+    for(int i = index; i < data.size(); i++)
     {
         output.append(data[i] + " ");
     }
@@ -80,10 +79,8 @@ void getCommand(std::queue<struct SenderInput> *output, std::string commStr)
     SenderInput out;
     out.is_packet = false;
     
-
-    //TODO: kontrola spravnosti parametrov
     //check commands
-    if(command[0] == COMAUTH)
+    if(command[0] == COMAUTH)   //AUTH
     {
         if(command.size() < 4)
         {
@@ -97,7 +94,7 @@ void getCommand(std::queue<struct SenderInput> *output, std::string commStr)
         }
         out.command = command;
     }
-    else if(command[0] == COMJOIN)
+    else if(command[0] == COMJOIN)  //JOIN
     {
         if(command.size() < 2)
         {
@@ -111,7 +108,7 @@ void getCommand(std::queue<struct SenderInput> *output, std::string commStr)
         }
         out.command = command;
     }
-    else if(command[0] == COMRENAME)
+    else if(command[0] == COMRENAME)    //RENAME
     {
         if(command.size() < 2)
         {
@@ -125,11 +122,11 @@ void getCommand(std::queue<struct SenderInput> *output, std::string commStr)
         }
         out.command = command;
     }
-    else if(command[0] == COMHELP)
+    else if(command[0] == COMHELP)  //HELP
     {
         out.command = command;
     }
-    else
+    else    //MESSAGE
     {
         std::vector<std::string> mess = {commStr};
         out.command = mess;
@@ -146,18 +143,17 @@ Packet* resolvePacket(std::string receivedMsg)
         receivedMsg.pop_back();
     }
     
+    //split packet
     std::vector<std::string> packetData;
     int start, end;
     start = end = 0;
     char dl = ' ';
-
-    //split packet
     while ((start = receivedMsg.find_first_not_of(dl, end)) != std::string::npos) {
         end = receivedMsg.find(dl, start);
         packetData.push_back(receivedMsg.substr(start, end - start));
     }
 
-
+    //handle data
     if(packetData[0] == "REPLY")
     {
         if( !(validMessage(getDataToEnd(packetData, 3)) || packetData[2]=="IS" || packetData.size() < 3) )
@@ -212,19 +208,18 @@ Packet* resolvePacket(std::string receivedMsg)
 
     //anything another is received
     std::cerr << "ERR: Received invalid data!\n";
-    exit(1);
     return nullptr;
 }
 
 Packet* resolveUDPPacket(std::string receivedMsg)
 {
+    //get message id
     uint16_t msgId = 0;
     char splitMsg[2];
     splitMsg[0] = receivedMsg[1];
     splitMsg[1] = receivedMsg[2];
-
     std::memcpy(&msgId, &splitMsg, 2);
-    msgId = ntohs(msgId);
+    //msgId = ntohs(msgId);
 
     switch (receivedMsg[0])
     {
@@ -272,6 +267,7 @@ Packet* resolveUDPPacket(std::string receivedMsg)
             std::string pass;
             int index = 3;
 
+            //get username
             while(receivedMsg[index]!='\x00')
             {
                 
@@ -284,6 +280,7 @@ Packet* resolveUDPPacket(std::string receivedMsg)
                 index++;
             }
 
+            //get display name
             index++;
             while(receivedMsg[index]!='\x00')
             {
@@ -297,6 +294,7 @@ Packet* resolveUDPPacket(std::string receivedMsg)
                 index++;
             }
 
+            //get secret
             index++;
             while(receivedMsg[index]!='\x00')
             {

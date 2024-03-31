@@ -26,11 +26,12 @@ enum Protocol{
 struct ParsedArgs {
   Protocol protocol;
   std::string ip;
-  int port;
+  std::string port;
   int timeout;
   int transmissions;
 };
 
+//methods for input handling
 void getCommand(std::queue<struct SenderInput> *output, std::string commStr);
 
 Packet* resolvePacket(std::string receivedMsg);

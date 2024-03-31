@@ -36,6 +36,11 @@ std::string UDPController::getPacketMessage(Packet* packet)
     return "";
 }
 
+ControllerType UDPController::getType()
+{
+    return UDPCONT;
+}
+
 void UDPController::chat()
 {
     while(this->state != STATE_END)
@@ -161,7 +166,7 @@ void UDPController::auth_events()
             {
                 handle_packet(command);
                 UDPPacketBye* packet = new UDPPacketBye(this->messageId++);
-                this->socket.sendPacket(packet);
+                this->socket.sendPacket(packet, this->retramsittions, this->timeout);
                 this->state = STATE_END;
             }
             else
@@ -265,7 +270,7 @@ void UDPController::open_events()
 void UDPController::error_events()
 {
     UDPPacketBye *packet = new UDPPacketBye(this->messageId++);
-    this->socket.sendPacket(packet);
+    this->socket.sendPacket(packet, this->retramsittions, this->timeout);
     this->state = STATE_END;
 }
 
@@ -293,7 +298,7 @@ void UDPController::handle_packet(SenderInput command)
         int_handler();
         exit(0);
     }
-    this->socket.sendPacket(new UDPPacketConfirm(messageId));
+    this->socket.sendPacket(new UDPPacketConfirm(messageId), this->retramsittions, this->timeout);
 }
 
 void UDPController::handle_command(SenderInput command)
@@ -308,7 +313,7 @@ void UDPController::handle_command(SenderInput command)
     {
         UDPPacketAuth *packet = new UDPPacketAuth(this->messageId++, command.command[1], command.command[2], command.command[3]);
         this->displayName = command.command[3];
-        if(this->socket.sendPacket(packet))
+        if(this->socket.sendPacket(packet, this->retramsittions, this->timeout))
         {
             std::cerr << "ERR: Not received Confirm packet.\n";
             exit(1);
@@ -317,7 +322,7 @@ void UDPController::handle_command(SenderInput command)
     else if(command.command[0] == COMJOIN)
     {
         UDPPacketJoin *packet = new UDPPacketJoin(this->messageId++, command.command[1], this->displayName);
-        if(this->socket.sendPacket(packet))
+        if(this->socket.sendPacket(packet, this->retramsittions, this->timeout))
         {
             std::cerr << "ERR: Not received Confirm packet.\n";
             exit(1);
@@ -335,7 +340,7 @@ void UDPController::handle_command(SenderInput command)
     {
         //message
         UDPPacketMsg *packet = new UDPPacketMsg(this->messageId++, this->displayName, command.command[0]);
-        if(this->socket.sendPacket(packet))
+        if(this->socket.sendPacket(packet, this->retramsittions, this->timeout))
         {
             std::cerr << "ERR: Not received Confirm packet.\n";
             exit(1);
@@ -387,5 +392,5 @@ void UDPController::read_from_socket()
 
 void UDPController::int_handler(){
     UDPPacketBye *packet = new UDPPacketBye(this->messageId++);
-    this->socket.sendPacket(packet);
+    this->socket.sendPacket(packet, this->retramsittions, this->timeout);
 }

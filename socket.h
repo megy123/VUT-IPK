@@ -12,13 +12,12 @@ private:
 
 public:
     Socket();
-    Socket(int socktype);
     Socket(const char server_ip[], const char port[], int socktype);
 
-    int sendPacket(Packet *packet);
+    int sendPacket(Packet *packet, int retransmissions, int timeout);//UDP version
+    int sendPacket(Packet *packet);//TCP version
     std::string receiveData();
     bool dataAvailable();
-    int rebindSocket();
 };
 
 #endif

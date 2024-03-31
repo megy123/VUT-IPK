@@ -1,7 +1,5 @@
 #include "MyPacket.h"
 
-
-
 std::string Packet::getUDPHeader(PacketType type, uint16_t messageID)
 {
     //init helper variables
@@ -12,8 +10,8 @@ std::string Packet::getUDPHeader(PacketType type, uint16_t messageID)
 
     //set up header
     output += UDPMessageType[type];
-    output += buf[1];
     output += buf[0];
+    output += buf[1];
 
     return output;
 }

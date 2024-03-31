@@ -1,6 +1,7 @@
 #ifndef UDPCON
 #define UDPCON
 
+#include "Controller.h"
 #include "socket.h"
 #include "MyPacket.h"
 #include <atomic>
@@ -11,7 +12,7 @@
 #include "parser.h"
 #include <sys/poll.h>
 
-class UDPController {
+class UDPController: public Controller {
 private:
     std::string ip;
     Socket socket;
@@ -35,10 +36,11 @@ private:
     void open_events();
     void error_events();
 public:
-    UDPController(const char server_ip[],const char port[], int timeout, int retramsittions);
+    UDPController(const char server_ip[], const char port[], int timeout, int retramsittions);
 
     void chat();
     void int_handler();
+    virtual ControllerType getType();
 };
 
 #endif

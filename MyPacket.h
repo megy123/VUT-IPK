@@ -15,8 +15,6 @@ enum PacketType{
     CONFIRM
 };
 
-
-
 class Packet{
 private:
     

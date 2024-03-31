@@ -1,6 +1,7 @@
 #ifndef TCPCON
 #define TCPCON
 
+#include "Controller.h"
 #include "socket.h"
 #include "MyPacket.h"
 #include <atomic>
@@ -21,7 +22,7 @@ struct SenderInput{
     bool is_packet;
 };
 
-class TCPController {
+class TCPController : public Controller{
 private:
     Socket socket;
     std::queue<struct SenderInput> commands;
@@ -45,6 +46,7 @@ public:
 
     void chat();
     void int_handler();
+    virtual ControllerType getType();
 };
 
 #endif
