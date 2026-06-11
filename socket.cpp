@@ -123,7 +123,7 @@ int Socket::sendPacket(Packet *packet, int retransmissions, int timeout)
     FD_SET(this->soc, &desc);
 
     // sets timeout
-    struct timeval tv = { 0 };
+    struct timeval tv = {};
     tv.tv_sec = 0;
     tv.tv_usec = timeout * 1000; //microseconds
 

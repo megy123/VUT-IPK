@@ -38,6 +38,10 @@ std::string UDPController::getPacketMessage(Packet* packet)
             return dynamic_cast<UDPPacketMsg*>(packet)->getMessage();
             break;
         }
+    default:
+        {
+            return "";
+        }
     }
     return "";
 }

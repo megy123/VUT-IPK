@@ -1,22 +1,22 @@
-# Project: IPK 1. projekt
-# File: MakeFile
-# Author: Dominik Sajko (xsajko01)
-# Date: 31.03.2024
+# Project: IPK24 Chat Client
+# Author: Dominik Sajko
 
-CC = g++
-CFLAGS = -std=c++20 -Wall -Wextra -Werror -pedantic
-SRCS = $(wildcard *.cpp)
-OBJS := $(SRCS:%.cpp=%.o)
+CXX := g++
+CXXFLAGS := -std=c++20 -Wall -Wextra -Werror -pedantic
+TARGET := ipk24chat-client
 
-.PHONY: clean zip
+SRCS := $(wildcard *.cpp)
+OBJS := $(SRCS:.cpp=.o)
 
-# Main target
-ipk24chat-client: $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $^
+.PHONY: all clean zip
 
-#utils
+all: $(TARGET)
+
+$(TARGET): $(OBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $^
+
 zip:
-	zip xsajko01.zip *.cpp *.h Makefile CHANGELOG.md LICENCE class_diagram.png README.md
+	zip xsajko01.zip *.cpp *.h Makefile CHANGELOG.md LICENSE README.md docs/class_diagram.png
 
 clean:
-	rm -f *.o ipk24chat-client
+	rm -f $(OBJS) $(TARGET)

@@ -38,6 +38,10 @@ std::string TCPController::getPacketMessage(Packet* packet)
             return dynamic_cast<TCPPacketMsg*>(packet)->getMessage();
             break;
         }
+    default:
+        {
+            return "";
+        }
     }
     return "";
 }

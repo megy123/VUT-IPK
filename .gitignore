@@ -1,0 +1,20 @@
+# Build artifacts
+*.o
+*.out
+*.zip
+ipk24chat-client
+
+# Local editor and OS files
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db
+
+# Debug/runtime files
+core
+core.*
+*.log
+*.pcap
+*.pcapng

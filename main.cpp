@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        controller = new UDPController(args.ip.c_str(), args.port.c_str(), 250, 3);
+        controller = new UDPController(args.ip.c_str(), args.port.c_str(), args.timeout, args.transmissions);
     }
     
     //Assign interrupt handler

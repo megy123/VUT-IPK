@@ -13,7 +13,7 @@ std::string getDataToEnd(std::vector<std::string> data, int index)
 {
     std::string output = "";
 
-    for(int i = index; i < data.size(); i++)
+    for(size_t i = static_cast<size_t>(index); i < data.size(); i++)
     {
         output.append(data[i] + " ");
     }
@@ -24,7 +24,7 @@ std::string getDataToEnd(std::vector<std::string> data, int index)
 bool validName(std::string data)
 {
     if(data.size() > 20)return false;
-    for(int i=0;i<data.size();i++)
+    for(size_t i = 0; i < data.size(); i++)
     {
         if(!( (data[i] >= 'A' && data[i] <= 'Z') ||
               (data[i] >= 'a' && data[i] <= 'z') ||
@@ -37,7 +37,7 @@ bool validName(std::string data)
 bool validDName(std::string data)
 {
     if(data.size() > 20)return false;
-    for(int i=0;i<data.size();i++)
+    for(size_t i = 0; i < data.size(); i++)
     {
         if(!( (data[i] >= '\x21' && data[i] <= '\x7E')))return false;
     }
@@ -47,7 +47,7 @@ bool validDName(std::string data)
 bool validSecret(std::string data)
 {
     if(data.size() > 128)return false;
-    for(int i=0;i<data.size();i++)
+    for(size_t i = 0; i < data.size(); i++)
     {
         if(!( (data[i] >= 'A' && data[i] <= 'Z') ||
               (data[i] >= 'a' && data[i] <= 'z') ||
@@ -60,7 +60,7 @@ bool validSecret(std::string data)
 bool validMessage(std::string data)
 {
     if(data.size() > 1500)return false;
-    for(int i=0;i<data.size();i++)
+    for(size_t i = 0; i < data.size(); i++)
     {
         if(!( (data[i] >= '\x20' && data[i] <= '\x7E')))return false;
     }
@@ -70,16 +70,16 @@ bool validMessage(std::string data)
 std::string getString(std::string *data, int *index)
 {
     std::string output;
-    while((*data)[*index]!='\x00')
+    while(static_cast<size_t>(*index) < data->size() && (*data)[*index] != '\x00')
     {
         
         output += (*data)[*index];
-        if(*index == (*data).size())
-        {    
-            std::cerr << "ERR: Invalid packet structure.\n";
-            exit(1);
-        }
         (*index)++;
+    }
+    if(static_cast<size_t>(*index) >= data->size())
+    {    
+        std::cerr << "ERR: Invalid packet structure.\n";
+        exit(1);
     }
     return output;
 }
@@ -88,8 +88,8 @@ std::string getString(std::string *data, int *index)
 void getCommand(std::queue<struct SenderInput> *output, std::string commStr)
 {
     std::vector<std::string> command;
-    int start = 0;
-    int end = 0;
+    std::string::size_type start = 0;
+    std::string::size_type end = 0;
     //read command
     while ((start = commStr.find_first_not_of(' ', end)) != std::string::npos) {
         end = commStr.find(' ', start);
@@ -165,8 +165,8 @@ Packet* resolvePacket(std::string receivedMsg)
     
     //split packet
     std::vector<std::string> packetData;
-    int start = 0;
-    int end = 0;
+    std::string::size_type start = 0;
+    std::string::size_type end = 0;
     while ( (start = receivedMsg.find_first_not_of(' ', end)) != std::string::npos ) {
         end = receivedMsg.find(' ', start);
         packetData.push_back(receivedMsg.substr(start, end - start));
@@ -270,7 +270,7 @@ Packet* resolveUDPPacket(std::string receivedMsg)
             std::memcpy(&refMsgId, &splitMessage, 2);
             
             std::string Message;
-            for(int i = 6;i<receivedMsg.size();i++)
+            for(size_t i = 6; i < receivedMsg.size(); i++)
             {
                 Message += receivedMsg[i];
                 if(receivedMsg[i] == '\x00')break;
